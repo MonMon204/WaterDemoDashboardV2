@@ -35876,7 +35876,7 @@ function CT({ status: o }) {
     children: o || "—",
   });
 }
-function Td({ valves: o, mode: e, onSendCmd: i, ftcModeOn: tdFTC }) {
+function Td({ valves: o, mode: e, onSendCmd: i }) {
   const r = e === "operator";
   return M.jsxs("div", {
     className: "mare-panel p-4 flex flex-col gap-3",
@@ -35892,7 +35892,7 @@ function Td({ valves: o, mode: e, onSendCmd: i, ftcModeOn: tdFTC }) {
           const d = u + 1,
             h = o[`valve${d}`],
             m = d === 8 ? "CV8" : `XV${d}`,
-            p = d === 7 ? (tdFTC ? "water/control/ftc/valve7" : "water/control/valve7") : `water/control/valve${d}`;
+            p = d === 7 ? "water/control/ftc/valve7" : `water/control/valve${d}`;
           return M.jsxs(
             "div",
             {
@@ -36370,7 +36370,6 @@ function Rd({
   faultInfo: rdFI,
   pumpBadges: rdPB,
   onSendCmd: u,
-  ftcModeOn: rdFTC,
 }) {
   const [d, h] = qt.useState("schematic"),
     [m, p] = qt.useState(null),
@@ -36388,7 +36387,7 @@ function Rd({
       const C = i[`valve${b}`];
       if (g) {
         const tt = C === "OPEN" ? "0" : "1",
-          at = b === 7 ? (rdFTC ? "water/control/ftc/valve7" : "water/control/valve7") : `water/control/valve${b}`;
+          at = b === 7 ? "water/control/ftc/valve7" : `water/control/valve${b}`;
         u(at, tt);
       } else {
         const tt = b === 8 ? "CV8" : `XV${b}`;
@@ -36399,7 +36398,7 @@ function Rd({
       const C = e[`pump${b}`];
       if (g) {
         const tt = C === "OPEN" ? "0" : "1";
-        u(rdFTC ? `water/control/ftc/pump${b}` : `water/control/pump${b}`, tt);
+        u(`water/control/ftc/pump${b}`, tt);
       } else (p({ text: `PUMP ${b}: ${C || "UNKNOWN"}` }), setTimeout(() => p(null), 2e3));
     },
     $ = (b) => {
@@ -36940,7 +36939,7 @@ function Rd({
                         const _label = _pb.tripped ? "TRIPPED" : _pb.blocked ? "BLOCKED" : _pb.locked ? "LOCKED" : _pb.backup ? "BACKUP" : null;
                         if (!_label) return null;
                         const _c = (_pb.tripped || _pb.blocked) ? "#ef4444" : "#f59e0b";
-                        return M.jsx("text", { x:"0", y:"-44", fontFamily:"JetBrains Mono, monospace", fontSize:"7", fontWeight:"700", fill:_c, textAnchor:"middle", children:_label });
+                        return M.jsx("text", { x:"0", y:"-26", fontFamily:"JetBrains Mono, monospace", fontSize:"7", fontWeight:"700", fill:_c, textAnchor:"middle", children:_label });
                       })(),
                     ],
                   }),
@@ -37080,7 +37079,7 @@ function Rd({
                         const _label = _pb.tripped ? "TRIPPED" : _pb.blocked ? "BLOCKED" : _pb.locked ? "LOCKED" : _pb.backup ? "BACKUP" : null;
                         if (!_label) return null;
                         const _c = (_pb.tripped || _pb.blocked) ? "#ef4444" : "#f59e0b";
-                        return M.jsx("text", { x:"0", y:"-44", fontFamily:"JetBrains Mono, monospace", fontSize:"7", fontWeight:"700", fill:_c, textAnchor:"middle", children:_label });
+                        return M.jsx("text", { x:"0", y:"-28", fontFamily:"JetBrains Mono, monospace", fontSize:"7", fontWeight:"700", fill:_c, textAnchor:"middle", children:_label });
                       })(),
                     ],
                   }),
@@ -37220,7 +37219,7 @@ function Rd({
                         const _label = _pb.tripped ? "TRIPPED" : _pb.blocked ? "BLOCKED" : _pb.locked ? "LOCKED" : _pb.backup ? "BACKUP" : null;
                         if (!_label) return null;
                         const _c = (_pb.tripped || _pb.blocked) ? "#ef4444" : "#f59e0b";
-                        return M.jsx("text", { x:"0", y:"-44", fontFamily:"JetBrains Mono, monospace", fontSize:"7", fontWeight:"700", fill:_c, textAnchor:"middle", children:_label });
+                        return M.jsx("text", { x:"0", y:"-28", fontFamily:"JetBrains Mono, monospace", fontSize:"7", fontWeight:"700", fill:_c, textAnchor:"middle", children:_label });
                       })(),
                     ],
                   }),
@@ -37397,7 +37396,7 @@ function Rd({
                     children: l.includes("flow2") ? "⚠ FLOW TX FT2" : "FLOW TX FT2",
                   }),
                   l.includes("flow2") ? M.jsxs(M.Fragment, { children: [
-                    M.jsx("text", { x:"624", y:"181", fontFamily:"JetBrains Mono, monospace", fontSize:"10", fontWeight:"700", fill:"#ef444499", children: o.flow2 != null ? `${o.flow2.toFixed(1)} m³/h` : "— m³/h" }),
+                    M.jsx("text", { x:"624", y:"181", fontFamily:"JetBrains Mono, monospace", fontSize:"10", fontWeight:"700", fill:"#ef444499", children: o.flow2 ? `${o.flow2.toFixed(1)} m³/h` : "— m³/h" }),
                     M.jsx("text", { x:"624", y:"194", fontFamily:"JetBrains Mono, monospace", fontSize:"10", fontWeight:"700", fill:"#00B4D8", children: mqrSimRd && mqrSimRd.flow2 != null ? `SIM ${mqrSimRd.flow2.toFixed(1)} m³/h` : "SIM — m³/h" }),
                   ]}) : M.jsx("text", {
                     x: "624",
@@ -37406,7 +37405,7 @@ function Rd({
                     fontSize: "16",
                     fontWeight: "700",
                     fill: "#00B4D8",
-                    children: o.flow2 != null ? `${o.flow2.toFixed(1)} m³/h` : "— m³/h",
+                    children: o.flow2 ? `${o.flow2.toFixed(1)} m³/h` : "— m³/h",
                   }),
                   M.jsx("rect", {
                     x: "14",
@@ -37464,7 +37463,7 @@ function Rd({
                     fontSize: "16",
                     fontWeight: "700",
                     fill: "#00B4D8",
-                    children: o.flow1 != null ? `${o.flow1.toFixed(1)} m³/h` : "— m³/h",
+                    children: o.flow1 ? `${o.flow1.toFixed(1)} m³/h` : "— m³/h",
                   }),
                   M.jsx("rect", {
                     x: "616",
@@ -38600,7 +38599,6 @@ function PT() {
                 faultInfo: P,
                 pumpBadges: mqrBadges,
                 onSendCmd: C,
-                ftcModeOn: S,
               }),
               M.jsxs("div", {
                 className: "grid grid-cols-2 gap-3",
@@ -38614,7 +38612,7 @@ function PT() {
                     pumpBadges: mqrBadges,
                     onSendCmd: C,
                   }),
-                  M.jsx(Td, { valves: g, mode: o, onSendCmd: C, ftcModeOn: S }),
+                  M.jsx(Td, { valves: g, mode: o, onSendCmd: C }),
                 ],
               }),
             ],
@@ -38654,7 +38652,6 @@ function PT() {
                 faultInfo: P,
                 pumpBadges: mqrBadges,
                 onSendCmd: C,
-                ftcModeOn: S,
               }),
               M.jsx(bd, {
                 pumps: p,
@@ -38665,7 +38662,7 @@ function PT() {
                 pumpBadges: mqrBadges,
                 onSendCmd: C,
               }),
-              M.jsx(Td, { valves: g, mode: o, onSendCmd: C, ftcModeOn: S }),
+              M.jsx(Td, { valves: g, mode: o, onSendCmd: C }),
             ],
           }),
           M.jsxs("div", {
@@ -38705,7 +38702,6 @@ function PT() {
                       faultInfo: P,
                       pumpBadges: mqrBadges,
                       onSendCmd: C,
-                      ftcModeOn: S,
                     }),
                   ],
                 }),
