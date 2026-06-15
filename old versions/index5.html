@@ -37599,78 +37599,6 @@ function Rd({
                 ],
               }),
             }),
-            M.jsx("div", {
-              className: "lg:hidden grid grid-cols-2 gap-2",
-              children: [
-                { key: "up",   label: "UPPER TANK",  val: _, pct: E, max: 32, isFault: l.includes("levelTop"),    simVal: mqrSimRd && mqrSimRd.levelTop },
-                { key: "down", label: "SOURCE TANK", val: S, pct: R, max: 22, isFault: l.includes("levelBottom"), simVal: mqrSimRd && mqrSimRd.levelBottom },
-              ].map(({ key, label, val, pct, max, isFault, simVal }) =>
-                M.jsxs("div", {
-                  key: key,
-                  style: {
-                    background: isFault ? "rgba(239,68,68,0.08)" : "rgba(2,62,125,0.45)",
-                    border: `1px solid ${isFault ? "rgba(239,68,68,0.5)" : "rgba(0,180,216,0.2)"}`,
-                    borderRadius: "8px",
-                    padding: "10px 12px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "6px",
-                    animation: isFault ? "svgTankFault 1.5s infinite" : "none",
-                  },
-                  children: [
-                    M.jsx("div", {
-                      style: { fontSize: "9px", letterSpacing: "0.12em", fontFamily: "monospace", color: isFault ? "#ef4444" : "var(--text-secondary)", fontWeight: 700 },
-                      children: isFault ? `⚠ ${label}` : label,
-                    }),
-                    M.jsxs("div", {
-                      style: { display: "flex", alignItems: "flex-end", gap: "8px" },
-                      children: [
-                        M.jsxs("div", {
-                          style: { position: "relative", width: "18px", height: "52px", background: "rgba(0,24,69,0.8)", borderRadius: "3px", border: `1px solid ${isFault ? "rgba(239,68,68,0.4)" : "rgba(0,180,216,0.25)"}`, overflow: "hidden", flexShrink: 0 },
-                          children: [
-                            M.jsx("div", {
-                              style: {
-                                position: "absolute", bottom: 0, left: 0, right: 0,
-                                height: `${Math.round(pct * 100)}%`,
-                                background: isFault ? "linear-gradient(to top, rgba(239,68,68,0.5), rgba(239,68,68,0.2))" : "linear-gradient(to top, rgba(0,150,255,0.6), rgba(0,201,167,0.27))",
-                                transition: "height 0.6s ease",
-                              },
-                            }),
-                          ],
-                        }),
-                        M.jsxs("div", {
-                          style: { display: "flex", flexDirection: "column", gap: "2px", flex: 1 },
-                          children: [
-                            M.jsx("div", {
-                              style: { fontSize: "18px", fontWeight: 700, fontFamily: "JetBrains Mono, monospace", color: isFault ? "#ef4444" : "#00B4D8", lineHeight: 1 },
-                              children: val ? `${val.toFixed(1)}` : "—",
-                            }),
-                            M.jsx("div", {
-                              style: { fontSize: "10px", color: "var(--text-secondary)", fontFamily: "monospace" },
-                              children: `cm / ${max} cm`,
-                            }),
-                            isFault && simVal != null && M.jsx("div", {
-                              style: { fontSize: "9px", color: "#00B4D8", fontFamily: "monospace", marginTop: "2px" },
-                              children: `SIM: ${simVal.toFixed(1)} cm`,
-                            }),
-                            M.jsx("div", {
-                              style: { marginTop: "2px", height: "3px", borderRadius: "2px", background: "rgba(0,180,216,0.12)", overflow: "hidden" },
-                              children: M.jsx("div", {
-                                style: { height: "100%", width: `${Math.round(pct * 100)}%`, background: isFault ? "#ef4444" : "#00B4D8", transition: "width 0.6s ease" },
-                              }),
-                            }),
-                            M.jsx("div", {
-                              style: { fontSize: "8px", color: "var(--text-secondary)", fontFamily: "monospace", opacity: 0.6 },
-                              children: `${Math.round(pct * 100)}%`,
-                            }),
-                          ],
-                        }),
-                      ],
-                    }),
-                  ],
-                }, key)
-              ),
-            }),
           ],
         }),
       d === "readings" && M.jsx(wT, { sensors: o, sensorFaults: l, simSensors: mqrSimRd }),
@@ -38346,7 +38274,7 @@ function NT() {
       [k],
     ),
     C = qt.useCallback(
-      (U) => {
+      (U, publish = true) => {           // ← publish flag: true when toggled locally
         (E(U),
           U
             ? k("FTC Mode ON — commands routed through Matlab", "ok")
@@ -38359,10 +38287,13 @@ function NT() {
                   ftcOutRef.current,
                   realStateRef.current,
                 )));
+        if (publish && F.current && o) {   // ← broadcast to all dashboards
+          F.current.publish("water/system/ftcmode", U ? "1" : "0", { retain: true });
+        }
       },
-      [k],
+      [k, o],                              // ← add `o` (connected) to deps
     ),
-    tt = qt.useCallback(() => {
+     tt = qt.useCallback((localOnly = false) => {
       // ── clear React latches ──
       x(!1);
       N(!1);
@@ -38382,22 +38313,22 @@ function NT() {
       window.__pumpBadges = _clearedBadges;
       // ── update React pumpBadges state so badges are removed from the UI ──
       _setBadgesRef.current && _setBadgesRef.current({ ..._clearedBadges });
-      (k("FTC reset: all commands zeroed, trips cleared, latch released", "ok"),
-        F.current &&
-          o &&
-          (["pumpA", "pumpB", "pumpC"].forEach(function (mqrp) {
-            F.current.publish("water/control/ftc/" + mqrp, "0", { retain: true });
-          }),
-          F.current.publish("water/control/ftc/valve7", "0", { retain: true }),
-          setTimeout(function () {
-            F.current &&
-              (F.current.publish("water/control/ftc/reset", "1"),
-              setTimeout(function () {
-                F.current && F.current.publish("water/control/ftc/reset", "0");
-              }, 500));
-          }, 150),
-          F.current.publish("water/system/ftcreset", "1")));
-    }, [k]),
+      k("FTC reset: all commands zeroed, trips cleared, latch released", "ok");
+      if (!localOnly && F.current && o) {
+        ["pumpA", "pumpB", "pumpC"].forEach(function (mqrp) {
+          F.current.publish("water/control/ftc/" + mqrp, "0", { retain: true });
+        });
+        F.current.publish("water/control/ftc/valve7", "0", { retain: true });
+        setTimeout(function () {
+          F.current &&
+            (F.current.publish("water/control/ftc/reset", "1"),
+            setTimeout(function () {
+              F.current && F.current.publish("water/control/ftc/reset", "0");
+            }, 500));
+        }, 150);
+        F.current.publish("water/system/ftcreset", "1");
+      }
+    }, [k, o]),
     _effect = qt.useEffect(() => {
       _setBadgesRef.current = setPumpBadges;
       window.__updatePumpBadges = (ftcIn, ftcOut, realState) => {
@@ -38468,9 +38399,9 @@ function NT() {
                         } catch (e) {}
                       })()
                     : V === "water/system/ftcmode"
-                      ? E(St === "1")
+                      ? C(St === "1", false)   // ← call full setFtcMode but with publish=false to avoid loop
                       : V === "water/system/ftcreset"
-                        ? tt()
+                        ? tt(true)    // ← local-only: clear UI but don't re-publish MQTT commands
                         : (V === "water/control/ftc/pumpA"
                             ? (ftcInRef.current.A = St)
                             : V === "water/control/ftc/pumpB"
