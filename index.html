@@ -38274,7 +38274,7 @@ function NT() {
       [k],
     ),
     C = qt.useCallback(
-      (U) => {
+      (U, publish = true) => {           // ← publish flag: true when toggled locally
         (E(U),
           U
             ? k("FTC Mode ON — commands routed through Matlab", "ok")
@@ -38287,8 +38287,11 @@ function NT() {
                   ftcOutRef.current,
                   realStateRef.current,
                 )));
+        if (publish && F.current && o) {   // ← broadcast to all dashboards
+          F.current.publish("water/system/ftcmode", U ? "1" : "0", { retain: true });
+        }
       },
-      [k],
+      [k, o],                              // ← add `o` (connected) to deps
     ),
     tt = qt.useCallback(() => {
       // ── clear React latches ──
@@ -38310,22 +38313,22 @@ function NT() {
       window.__pumpBadges = _clearedBadges;
       // ── update React pumpBadges state so badges are removed from the UI ──
       _setBadgesRef.current && _setBadgesRef.current({ ..._clearedBadges });
-      (k("FTC reset: all commands zeroed, trips cleared, latch released", "ok"),
-        F.current &&
-          o &&
-          (["pumpA", "pumpB", "pumpC"].forEach(function (mqrp) {
-            F.current.publish("water/control/ftc/" + mqrp, "0", { retain: true });
-          }),
-          F.current.publish("water/control/ftc/valve7", "0", { retain: true }),
-          setTimeout(function () {
-            F.current &&
-              (F.current.publish("water/control/ftc/reset", "1"),
-              setTimeout(function () {
-                F.current && F.current.publish("water/control/ftc/reset", "0");
-              }, 500));
-          }, 150),
-          F.current.publish("water/system/ftcreset", "1")));
-    }, [k]),
+      k("FTC reset: all commands zeroed, trips cleared, latch released", "ok");
+      if (!localOnly && F.current && o) {       // ← only the originating dashboard sends MQTT cmds
+        ["pumpA", "pumpB", "pumpC"].forEach(function (mqrp) {
+          F.current.publish("water/control/ftc/" + mqrp, "0", { retain: true });
+        });
+        F.current.publish("water/control/ftc/valve7", "0", { retain: true });
+        setTimeout(function () {
+          F.current &&
+            (F.current.publish("water/control/ftc/reset", "1"),
+            setTimeout(function () {
+              F.current && F.current.publish("water/control/ftc/reset", "0");
+            }, 500));
+        }, 150);
+        F.current.publish("water/system/ftcreset", "1"); // ← notify other dashboards
+      }
+    }, [k, o]),
     _effect = qt.useEffect(() => {
       _setBadgesRef.current = setPumpBadges;
       window.__updatePumpBadges = (ftcIn, ftcOut, realState) => {
@@ -38396,9 +38399,9 @@ function NT() {
                         } catch (e) {}
                       })()
                     : V === "water/system/ftcmode"
-                      ? E(St === "1")
+                      ? C(St === "1", false)   // ← call full setFtcMode but with publish=false to avoid loop
                       : V === "water/system/ftcreset"
-                        ? tt()
+                        ? tt(true)    // ← local-only: clear UI but don't re-publish MQTT commands
                         : (V === "water/control/ftc/pumpA"
                             ? (ftcInRef.current.A = St)
                             : V === "water/control/ftc/pumpB"
