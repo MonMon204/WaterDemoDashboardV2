@@ -38293,7 +38293,7 @@ function NT() {
       },
       [k, o],                              // ← add `o` (connected) to deps
     ),
-    tt = qt.useCallback(() => {
+     tt = qt.useCallback((localOnly = false) => {
       // ── clear React latches ──
       x(!1);
       N(!1);
@@ -38314,7 +38314,7 @@ function NT() {
       // ── update React pumpBadges state so badges are removed from the UI ──
       _setBadgesRef.current && _setBadgesRef.current({ ..._clearedBadges });
       k("FTC reset: all commands zeroed, trips cleared, latch released", "ok");
-      if (!localOnly && F.current && o) {       // ← only the originating dashboard sends MQTT cmds
+      if (!localOnly && F.current && o) {
         ["pumpA", "pumpB", "pumpC"].forEach(function (mqrp) {
           F.current.publish("water/control/ftc/" + mqrp, "0", { retain: true });
         });
@@ -38326,7 +38326,7 @@ function NT() {
               F.current && F.current.publish("water/control/ftc/reset", "0");
             }, 500));
         }, 150);
-        F.current.publish("water/system/ftcreset", "1"); // ← notify other dashboards
+        F.current.publish("water/system/ftcreset", "1");
       }
     }, [k, o]),
     _effect = qt.useEffect(() => {
