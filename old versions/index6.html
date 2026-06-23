@@ -38359,7 +38359,6 @@ function NT() {
                   ftcOutRef.current,
                   realStateRef.current,
                 )));
-        F.current && F.current.publish("water/system/ftcmode", U ? "1" : "0", { retain: true });
       },
       [k],
     ),
@@ -38385,6 +38384,7 @@ function NT() {
       _setBadgesRef.current && _setBadgesRef.current({ ..._clearedBadges });
       (k("FTC reset: all commands zeroed, trips cleared, latch released", "ok"),
         F.current &&
+          o &&
           (["pumpA", "pumpB", "pumpC"].forEach(function (mqrp) {
             F.current.publish("water/control/ftc/" + mqrp, "0", { retain: true });
           }),
@@ -38398,9 +38398,6 @@ function NT() {
           }, 150),
           F.current.publish("water/system/ftcreset", "1")));
     }, [k]),
-    _autoConnect = qt.useEffect(() => {
-      at();
-    }, []),
     _effect = qt.useEffect(() => {
       _setBadgesRef.current = setPumpBadges;
       window.__updatePumpBadges = (ftcIn, ftcOut, realState) => {
@@ -38472,26 +38469,9 @@ function NT() {
                       })()
                     : V === "water/system/ftcmode"
                       ? E(St === "1")
-                      : V === "water/system/ftcreset" && St === "1"
-                      ? (() => {
-                          x(!1);
-                          N(!1);
-                          p(0);
-                          window.__latchedLock = false;
-                          window.__latchedTrip = false;
-                          ftcInRef.current  = { A: "0", B: "0", C: "0" };
-                          ftcOutRef.current = { A: "0", B: "0", C: "0" };
-                          realStateRef.current = { A: 0, B: 0, C: 0 };
-                          const _cb = {
-                            A: { tripped: false, backup: false, locked: false, blocked: false },
-                            B: { tripped: false, backup: false, locked: false, blocked: false },
-                            C: { tripped: false, backup: false, locked: false, blocked: false },
-                          };
-                          window.__pumpBadges = _cb;
-                          _setBadgesRef.current && _setBadgesRef.current({ ..._cb });
-                          k("FTC reset received from another device", "ok");
-                        })()
-                      : (V === "water/control/ftc/pumpA"
+                      : V === "water/system/ftcreset"
+                        ? tt()
+                        : (V === "water/control/ftc/pumpA"
                             ? (ftcInRef.current.A = St)
                             : V === "water/control/ftc/pumpB"
                               ? (ftcInRef.current.B = St)
